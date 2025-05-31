@@ -4,8 +4,19 @@
       <div class="card-header">
         <div class="card-header-content">
           <h3>Productos</h3>
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Buscar producto..."
+            class="search-input"
+            style="margin-right: 1rem; min-width: 200px;"
+          />
           <div class="header-actions">
-            <button @click="toggleProductosAgotados" class="button secondary">
+            <button 
+              @click="toggleProductosAgotados" 
+              class="button secondary"
+              :class="{ 'agotados-activo': showProductosAgotados }"
+            >
               <Eye v-if="showProductosAgotados" class="icon-small" />
               <AlertTriangle v-else class="icon-small" />
               {{ showProductosAgotados ? 'Ver Todos' : 'Ver Agotados' }}
@@ -160,15 +171,23 @@ const productErrors = reactive({
   stock: ''
 });
 
-// Computed para productos visibles según el filtro
+// Estado para búsqueda
+const searchQuery = ref('');
+
+// Computed para productos visibles según el filtro y búsqueda
 const productosVisibles = computed(() => {
-  if (showProductosAgotados.value) {
-    // Mostrar solo productos agotados (stock = 0)
-    return productos.value.filter(producto => producto.stock === 0);
-  } else {
-    // Mostrar solo productos con stock > 0
-    return productos.value.filter(producto => producto.stock > 0);
+  let filtered = showProductosAgotados.value
+    ? productos.value.filter(producto => producto.stock === 0)
+    : productos.value.filter(producto => producto.stock > 0);
+
+  if (searchQuery.value.trim() !== '') {
+    const q = searchQuery.value.trim().toLowerCase();
+    filtered = filtered.filter(producto =>
+      producto.nombre.toLowerCase().includes(q) ||
+      (producto.descripcion && producto.descripcion.toLowerCase().includes(q))
+    );
   }
+  return filtered;
 });
 
 // Computed para paginación
@@ -257,4 +276,10 @@ const saveProduct = async () => {
 
 <style scoped>
 @import '../styles/pages/ProductsPage.css';
+
+.agotados-activo {
+  background-color: #e53935 !important; /* Rojo */
+  color: #fff !important;
+  border-color: #e53935 !important;
+}
 </style>
