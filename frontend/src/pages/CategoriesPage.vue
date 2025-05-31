@@ -20,7 +20,7 @@
       <div class="categories-grid">
         <div v-for="categoria in categoriasPaginadas" :key="categoria.id" class="category-card">
           <div class="category-content">
-            <div class="category-icon">
+            <div class="category-icon" v-if="categoria?.nombre">
               {{ categoria.nombre.charAt(0).toUpperCase() }}
             </div>
             <div class="category-info">
@@ -89,13 +89,14 @@
       :category-errors="categoryErrors"
       @close="closeCategoryModal"
       @save="saveCategory"
+      @clear-error="clearError"
     />
 
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, getCurrentInstance } from 'vue';
 import { Plus, Edit, Grid } from 'lucide-vue-next';
 import CategoryModal from '../components/CategoryModal.vue';
 import { useCategorias } from '../composables/useApi.js';
@@ -110,11 +111,27 @@ const categoriasFiltradas = computed(() => {
 });
 
 // Usar el composable para categorías
+HEAD
 const { categorias, loading, error, crearCategoria, actualizarCategoria, eliminarCategoria, verificarNombreCategoria } = useCategorias();
+const { 
+  categorias, 
+  loading, 
+  error, 
+  cargarCategorias,
+  crearCategoria, 
+  actualizarCategoria, 
+  verificarNombreCategoria 
+} = useCategorias();
+3a40d9ab30808b754c82a71d07f211c2effea0a9
 
 // Estados para modales
 const showCategoryModal = ref(false);
 const editingCategory = ref(null);
+
+// Cargar categorías al montar el componente
+onMounted(() => {
+  cargarCategorias();
+});
 
 // Estados para paginación
 const currentPage = ref(1);
@@ -164,7 +181,11 @@ const previousPage = () => {
 // Funciones para categorías
 const openCategoryModal = (category = null) => {
   if (category) {
-    editingCategory.value = category;
+    // Make sure we're using the correct ID field (cod_categoria)
+    editingCategory.value = {
+      id: category.cod_categoria || category.id,
+      ...category
+    };
     categoryForm.nombre = category.nombre;
     categoryForm.descripcion = category.descripcion || '';
   } else {
@@ -178,26 +199,163 @@ const openCategoryModal = (category = null) => {
 const closeCategoryModal = () => {
   showCategoryModal.value = false;
   editingCategory.value = null;
-  Object.keys(categoryErrors).forEach(key => categoryErrors[key] = '');
+  clearError();
 };
+
+const clearError = (field = null) => {
+  if (field) {
+    categoryErrors[field] = '';
+  } else {
+    Object.keys(categoryErrors).forEach(key => categoryErrors[key] = '');
+  }
+};
+
+// Get the current app instance to access the toast plugin
+const { proxy } = getCurrentInstance();
 
 const saveCategory = async () => {
   try {
-    if (editingCategory.value) {
-      await actualizarCategoria(editingCategory.value.id, categoryForm);
-    } else {
-      await crearCategoria(categoryForm);
+    // Reset errors
+    clearError();
+    
+    // Validate required fields
+    if (!categoryForm.nombre?.trim()) {
+      categoryErrors.nombre = 'El nombre es requerido';
+      return;
     }
-    closeCategoryModal();
+
+    // Validate name length
+    const nombre = categoryForm.nombre.trim();
+    if (nombre.length < 2) {
+      categoryErrors.nombre = 'El nombre debe tener al menos 2 caracteres';
+      return;
+    }
+
+    if (nombre.length > 30) {
+      categoryErrors.nombre = 'El nombre no puede exceder 30 caracteres';
+      return;
+    }
+
+    // Check if category name already exists (only for new categories or when name changes)
+    if (!editingCategory.value || editingCategory.value.nombre !== nombre) {
+      const response = await verificarNombreCategoria(nombre);
+      if (response.existe) {
+        categoryErrors.nombre = response.mensaje || 'Ya existe una categoría con este nombre';
+        return;
+      }
+    }
+
+    // Prepare the payload
+    const categoriaData = {
+      nombre: nombre,
+      descripcion: categoryForm.descripcion?.trim() || null
+    };
+
+    let response;
+    
+    // Save or update the category
+    if (editingCategory.value) {
+      // Use cod_categoria if available, otherwise fall back to id
+      const categoryId = editingCategory.value.cod_categoria || editingCategory.value.id;
+      
+      // Ensure we have a valid ID
+      if (!categoryId) {
+        throw new Error('ID de categoría no proporcionado');
+      }
+      
+      // Convert ID to number and validate
+      const idNum = parseInt(categoryId, 10);
+      if (isNaN(idNum)) {
+        throw new Error('ID de categoría inválido');
+      }
+      
+      // Log the data being sent for debugging
+      console.log('Updating category with ID:', idNum, 'Data:', categoriaData);
+      
+      response = await actualizarCategoria(idNum, {
+        nombre: categoriaData.nombre,
+        descripcion: categoriaData.descripcion || null
+      });
+      
+      if (response && response.resultado) {
+        proxy.$toast.success(response.mensaje || '¡Categoría actualizada exitosamente!', 2000);
+      } else {
+        throw new Error(response?.mensaje || 'Error al actualizar la categoría');
+      }
+    } else {
+      // For create
+      response = await crearCategoria(categoriaData);
+      
+      if (response && response.resultado) {
+        proxy.$toast.success(response.mensaje || '¡Categoría creada exitosamente!', 2000);
+      } else {
+        throw new Error(response?.mensaje || 'Error al crear la categoría');
+      }
+    }
+    
+    // Force a refresh of the categories list
+    await cargarCategorias();
+    
+    // Close the modal after a short delay to show the success message
+    setTimeout(() => {
+      closeCategoryModal();
+    }, 500);
   } catch (err) {
-    console.error('Error al guardar categoría:', err);
-    // Si el error es por nombre duplicado, mostrar mensaje
-    if (err.response && err.response.data && err.response.data.error === 'El nombre de la categoría ya existe') {
-      categoryErrors.nombre = 'Este nombre de categoría ya existe';
+    console.error('Error al guardar la categoría:', err);
+    
+    // Check for validation errors from the server
+    if (err.response) {
+      // Server responded with a status code outside the 2xx range
+      console.error('Error response data:', err.response.data);
+      console.error('Error status:', err.response.status);
+      
+      // Handle specific error cases
+      if (err.response.status === 400) {
+        // Bad Request - validation errors
+        if (err.response.data.error) {
+          // Show the error message from the server
+          proxy.$toast.error(err.response.data.error, 3000);
+          
+          // If there's a field-specific error, show it in the form
+          if (err.response.data.field) {
+            categoryErrors[err.response.data.field] = err.response.data.error;
+          }
+        }
+      } else if (err.response.status === 404) {
+        // Not Found
+        proxy.$toast.error('Categoría no encontrada', 3000);
+      } else if (err.response.status === 409) {
+        // Conflict - duplicate name
+        if (err.response.data.error?.toLowerCase().includes('nombre')) {
+          categoryErrors.nombre = err.response.data.error;
+        }
+        proxy.$toast.error(err.response.data.error || 'Error de validación', 3000);
+      } else {
+        // Other server errors
+        proxy.$toast.error('Error en el servidor al procesar la solicitud', 3000);
+      }
+    } else if (err.request) {
+      // The request was made but no response was received
+      console.error('No response received:', err.request);
+      proxy.$toast.error('No se pudo conectar con el servidor', 3000);
+    } else if (err.message) {
+      // Something happened in setting up the request
+      console.error('Request setup error:', err.message);
+      
+      // Show user-friendly error messages for known errors
+      if (err.message.includes('ID de categoría')) {
+        proxy.$toast.error(err.message, 3000);
+      } else {
+        proxy.$toast.error('Error al procesar la solicitud', 3000);
+      }
+    } else {
+      // Unknown error
+      proxy.$toast.error('Ocurrió un error inesperado', 3000);
     }
   }
 };
 
+<<<<<<< HEAD
 // Eliminar categoría
 const deleteCategory = async (id) => {
   if (confirm('¿Estás seguro de que deseas eliminar esta categoría?')) {
@@ -213,6 +371,8 @@ onMounted(() => {
   // Trigger the composable to fetch categories on component mount
   useCategorias();
 });
+=======
+>>>>>>> 3a40d9ab30808b754c82a71d07f211c2effea0a9
 </script>
 
 <style scoped>
