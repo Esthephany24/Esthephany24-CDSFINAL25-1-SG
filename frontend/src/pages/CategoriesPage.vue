@@ -33,6 +33,15 @@
               <button @click="openCategoryModal(categoria)" class="icon-button edit">
                 <Edit class="icon-small" />
               </button>
+              <button @click="deleteCategory(categoria.id)" class="icon-button delete" title="Eliminar">
+                <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -91,7 +100,6 @@ import { Plus, Edit, Grid } from 'lucide-vue-next';
 import CategoryModal from '../components/CategoryModal.vue';
 import { useCategorias } from '../composables/useApi.js';
 
-// ...existing code...
 const searchQuery = ref('');
 
 const categoriasFiltradas = computed(() => {
@@ -101,10 +109,8 @@ const categoriasFiltradas = computed(() => {
   );
 });
 
-// ...existing code...
-
 // Usar el composable para categorías
-const { categorias, loading, error, crearCategoria, actualizarCategoria, verificarNombreCategoria } = useCategorias();
+const { categorias, loading, error, crearCategoria, actualizarCategoria, eliminarCategoria, verificarNombreCategoria } = useCategorias();
 
 // Estados para modales
 const showCategoryModal = ref(false);
@@ -192,6 +198,17 @@ const saveCategory = async () => {
   }
 };
 
+// Eliminar categoría
+const deleteCategory = async (id) => {
+  if (confirm('¿Estás seguro de que deseas eliminar esta categoría?')) {
+    try {
+      await eliminarCategoria(id);
+    } catch (err) {
+      alert('Error al eliminar la categoría');
+    }
+  }
+};
+
 onMounted(() => {
   // Trigger the composable to fetch categories on component mount
   useCategorias();
@@ -200,4 +217,12 @@ onMounted(() => {
 
 <style scoped>
 @import '../styles/pages/CategoriesPage.css';
+
+.icon-button.delete {
+  color: #e53935;
+}
+.icon-button.delete:hover {
+  background: #fdecea;
+  color: #b71c1c;
+}
 </style>
