@@ -4,6 +4,13 @@
       <div class="card-header">
         <div class="card-header-content">
           <h3>Categorías</h3>
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Buscar categoría..."
+            class="search-input"
+            style="margin-right: 1rem; min-width: 200px;"
+          />
           <button @click="openCategoryModal()" class="button primary">
             <Plus class="icon-small" />
             Nueva Categoría
@@ -83,6 +90,18 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import { Plus, Edit, Grid } from 'lucide-vue-next';
 import CategoryModal from '../components/CategoryModal.vue';
 import { useCategorias } from '../composables/useApi.js';
+
+// ...existing code...
+const searchQuery = ref('');
+
+const categoriasFiltradas = computed(() => {
+  if (!searchQuery.value.trim()) return categorias.value;
+  return categorias.value.filter(cat =>
+    cat.nombre.toLowerCase().includes(searchQuery.value.trim().toLowerCase())
+  );
+});
+
+// ...existing code...
 
 // Usar el composable para categorías
 const { categorias, loading, error, crearCategoria, actualizarCategoria, verificarNombreCategoria } = useCategorias();

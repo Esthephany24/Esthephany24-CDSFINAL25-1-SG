@@ -282,4 +282,20 @@ const saveProduct = async () => {
   color: #fff !important;
   border-color: #e53935 !important;
 }
+
+/* Estilos para el input de búsqueda */
+.search-input {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+  background: #fafafa;
+  color: #333;
+}
+.search-input:focus {
+  border-color: #1976d2;
+  background: #fff;
+}
 </style>
