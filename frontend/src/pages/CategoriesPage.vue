@@ -139,7 +139,7 @@ const endIndex = computed(() => {
 });
 
 const categoriasPaginadas = computed(() => {
-  return categorias.value.slice(startIndex.value, endIndex.value);
+  return categoriasFiltradas.value.slice(startIndex.value, endIndex.value);
 });
 
 // Funciones de paginación
