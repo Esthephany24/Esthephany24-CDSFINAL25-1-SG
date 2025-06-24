@@ -2,6 +2,7 @@ import { ref, onMounted } from "vue"
 import ProductoService from "../services/productoService"
 import CategoriaService from "../services/categoriaService"
 import LineaService from "../services/lineaService"
+import ProveedorService from "../services/proveedorService"
 
 export function useProductos() {
   const productos = ref([])
@@ -16,7 +17,7 @@ export function useProductos() {
       productos.value = data
     } catch (err) {
       error.value = "Error al cargar los productos"
-      console.error("Error cargando productos:", err)
+
     } finally {
       loading.value = false
     }
@@ -51,7 +52,6 @@ export function useProductos() {
     try {
       return await ProductoService.verificarNombre(nombre)
     } catch (err) {
-      console.error("Error verificando nombre:", err)
       return { existe: false }
     }
   }
@@ -84,7 +84,7 @@ export function useCategorias() {
       categorias.value = data
     } catch (err) {
       error.value = "Error al cargar las categorías"
-      console.error("Error cargando categorías:", err)
+
     } finally {
       loading.value = false
     }
@@ -119,7 +119,6 @@ export function useCategorias() {
     try {
       return await CategoriaService.verificarNombre(nombre)
     } catch (err) {
-      console.error("Error verificando nombre:", err)
       return { existe: false }
     }
   }
@@ -137,6 +136,7 @@ export function useCategorias() {
 
 export function useLineas() {
   const lineas = ref([])
+  const proveedores = ref([])
   const loading = ref(false)
   const error = ref(null)
 
@@ -154,81 +154,133 @@ export function useLineas() {
       }))
     } catch (err) {
       error.value = "Error al cargar las líneas"
-      console.error("Error cargando líneas:", err)
+      // Error cargando líneas
     } finally {
       loading.value = false
     }
   }
 
   const crearLinea = async (lineaData) => {
+    loading.value = true
+    error.value = null
     try {
-      // Mapear los campos de la UI a los nombres que espera el API
-      const dataParaAPI = {
-        nombre_linea: lineaData.nombre,
-        ruc: lineaData.ruc,
-        proveedor: lineaData.proveedor || "",
+
+      const response = await LineaService.crear(lineaData)
+      
+      // Si la respuesta es exitosa, recargar la lista de líneas
+      if (response && response.resultado) {
+        await cargarLineas()
+        return response
+      } else {
+        throw new Error(response?.mensaje || 'Error al crear la línea')
       }
-      const nuevaLinea = await LineaService.crear(dataParaAPI)
-      // Mapear la respuesta del API al formato que usa la UI
-      const lineaFormateada = {
-        id: nuevaLinea.cod_linea,
-        nombre: nuevaLinea.nombre_linea,
-        ruc: nuevaLinea.ruc,
-        proveedor: nuevaLinea.proveedor,
-      }
-      lineas.value.push(lineaFormateada)
-      return lineaFormateada
     } catch (err) {
-      error.value = "Error al crear la línea"
+      error.value = err.message || "Error al crear la línea"
       throw err
+    } finally {
+      loading.value = false
     }
   }
 
   const actualizarLinea = async (id, lineaData) => {
+    loading.value = true;
+    error.value = null;
+    
     try {
+
+      
       // Mapear los campos de la UI a los nombres que espera el API
       const dataParaAPI = {
-        nombre_linea: lineaData.nombre,
-        ruc: lineaData.ruc,
-        proveedor: lineaData.proveedor || "",
+        nombre_linea: lineaData.nombre_linea || lineaData.nombre, // Aceptar ambos formatos
+        ruc: lineaData.hasOwnProperty('ruc') ? lineaData.ruc : null, // Asegurar que se envíe null si no hay RUC
+        // No incluir proveedor si no es necesario en el backend
+      };
+      
+      const response = await LineaService.actualizar(id, dataParaAPI);
+      
+      // Si la respuesta es exitosa, recargar la lista de líneas
+      if (response && (response.resultado || response.cod_linea)) {
+        await cargarLineas();
+        return response;
+      } else {
+        throw new Error(response?.mensaje || 'Error al actualizar la línea');
       }
-      const lineaActualizada = await LineaService.actualizar(id, dataParaAPI)
-      // Mapear la respuesta del API al formato que usa la UI
-      const lineaFormateada = {
-        id: lineaActualizada.cod_linea,
-        nombre: lineaActualizada.nombre_linea,
-        ruc: lineaActualizada.ruc,
-        proveedor: lineaActualizada.proveedor,
-      }
-      const index = lineas.value.findIndex((l) => l.id === id)
-      if (index !== -1) {
-        lineas.value[index] = lineaFormateada
-      }
-      return lineaFormateada
     } catch (err) {
-      error.value = "Error al actualizar la línea"
-      throw err
+
+      error.value = err.message || 'Error al actualizar la línea';
+      throw err;
+    } finally {
+      loading.value = false;
     }
   }
 
+  // Verificar si un nombre de línea ya existe
   const verificarNombreLinea = async (nombre) => {
     try {
-      return await LineaService.verificarNombre(nombre)
+      if (!nombre || typeof nombre !== 'string') {
+        return { resultado: false };
+      }
+      
+      const response = await LineaService.verificarNombre(nombre);
+      return {
+        resultado: response.resultado || false,
+        mensaje: response.mensaje || 'Ya existe una línea con este nombre',
+        data: response.data || null
+      };
+    } catch (error) {
+
+      return { 
+        resultado: false,
+        mensaje: 'Error al verificar el nombre de la línea'
+      };
+    }
+  };
+
+  const cargarProveedores = async () => {
+    try {
+
+      const data = await ProveedorService.obtenerTodos();
+      
+      if (!Array.isArray(data)) {
+        // Se esperaba un array de proveedores pero se recibió un tipo diferente
+        return;
+      }
+      
+
+      
+      // Mapear los proveedores asegurando que el RUC esté presente
+      const mappedProveedores = data.map(proveedor => {
+        // Asegurarse de que el RUC existe, si no, usar un valor por defecto
+        const ruc = proveedor.ruc || proveedor.RUC || 'SIN_RUC';
+        const nombre = proveedor.nombre || proveedor.nombre_proveedor || 'Proveedor sin nombre';
+        
+
+        
+        return {
+          id: ruc, // Usar RUC como ID
+          nombre: nombre,
+          ruc: ruc
+        };
+      });
+      
+      proveedores.value = mappedProveedores;
+
     } catch (err) {
-      console.error("Error verificando nombre:", err)
-      return { existe: false }
+      // Error al cargar proveedores
     }
   }
 
-  onMounted(() => {
-    cargarLineas()
-  })
+  // Load initial data
+  cargarLineas()
+  cargarProveedores()
 
   return {
     lineas,
+    proveedores,
     loading,
     error,
     cargarLineas,
+    cargarProveedores,
     crearLinea,
     actualizarLinea,
     verificarNombreLinea,

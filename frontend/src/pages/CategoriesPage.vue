@@ -4,6 +4,7 @@
       <div class="card-header">
         <div class="card-header-content">
           <h3>Categorías</h3>
+<<<<<<< HEAD
           <input
             v-model="searchQuery"
             type="text"
@@ -15,17 +16,58 @@
             <Plus class="icon-small" />
             Nueva Categoría
           </button>
+=======
+          <div class="header-actions">
+            <!-- Buscador -->
+            <div class="search-container">
+              <div class="search-input-wrapper">
+                <Search class="search-icon" />
+                <input 
+                  v-model="searchTerm"
+                  type="text" 
+                  placeholder="Buscar categorías..."
+                  class="search-input"
+                  @input="handleSearch"
+                />
+                <button 
+                  v-if="searchTerm"
+                  @click="clearSearch"
+                  class="clear-search-button"
+                >
+                  <X class="icon-small" />
+                </button>
+              </div>
+            </div>
+            
+            <button @click="openCategoryModal()" class="button primary">
+              <Plus class="icon-small" />
+              Nueva Categoría
+            </button>
+          </div>
+>>>>>>> 3c4aa8dec5b71f6ec1f0e26f38b3164ad69c81af
         </div>
       </div>
-      <div class="categories-grid">
+      <!-- Indicador de carga -->
+      <div v-if="isLoading" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Cargando categorías...</p>
+      </div>
+
+      <!-- Contenido principal -->
+      <div v-else class="categories-grid">
         <div v-for="categoria in categoriasPaginadas" :key="categoria.id" class="category-card">
           <div class="category-content">
             <div class="category-icon" v-if="categoria?.nombre">
               {{ categoria.nombre.charAt(0).toUpperCase() }}
             </div>
             <div class="category-info">
-              <h4>{{ categoria.nombre }}</h4>
-              <p class="category-description">{{ categoria.descripcion || 'Sin descripción' }}</p>
+              <h4 class="cell-content">
+                {{ categoria.nombre }}
+              </h4>
+              <p class="category-description cell-content">
+                {{ categoria.descripcion || 'Sin descripción' }}
+                <span class="tooltip" v-if="categoria.descripcion">{{ categoria.descripcion }}</span>
+              </p>
             </div>
           </div>
           <div class="category-actions">
@@ -48,18 +90,24 @@
       </div>
       
       <!-- Mensaje cuando no hay categorías -->
-      <div v-if="categorias.length === 0" class="empty-state">
+      <div v-if="!isLoading && categoriasVisibles.length === 0" class="empty-state">
         <div class="empty-icon">
           <Grid class="icon-large" />
         </div>
-        <h4>No hay categorías disponibles</h4>
-        <p>Agrega categorías para organizar tus productos.</p>
+        <h4 v-if="searchTerm">No se encontraron categorías</h4>
+        <h4 v-else>No hay categorías disponibles</h4>
+        <p v-if="searchTerm">No hay categorías que coincidan con "{{ searchTerm }}"</p>
+        <p v-else>Agrega categorías para organizar tus productos.</p>
+        <button v-if="searchTerm" @click="clearSearch" class="button secondary">
+          Limpiar búsqueda
+        </button>
       </div>
       
       <!-- Paginación -->
-      <div v-if="categorias.length > 0" class="pagination">
+      <div v-if="categoriasVisibles.length > 0" class="pagination">
         <div class="pagination-info">
-          Mostrando {{ startIndex + 1 }}-{{ endIndex }} de {{ categorias.length }} categorías
+          Mostrando {{ startIndex + 1 }}-{{ endIndex }} de {{ categoriasVisibles.length }} categorías
+          <span v-if="searchTerm" class="filter-indicator">(Búsqueda: "{{ searchTerm }}"")</span>
         </div>
         <div class="pagination-controls">
           <button 
@@ -96,8 +144,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, getCurrentInstance } from 'vue';
-import { Plus, Edit, Grid } from 'lucide-vue-next';
+import { ref, reactive, computed, onMounted, getCurrentInstance, watch } from 'vue';
+import { Plus, Edit, Grid, Search, X } from 'lucide-vue-next';
 import CategoryModal from '../components/CategoryModal.vue';
 import { useCategorias } from '../composables/useApi.js';
 
@@ -128,14 +176,22 @@ const {
 const showCategoryModal = ref(false);
 const editingCategory = ref(null);
 
-// Cargar categorías al montar el componente
-onMounted(() => {
-  cargarCategorias();
-});
+// Estado para búsqueda
+const searchTerm = ref('');
 
-// Estados para paginación
+// Estados
+const isLoading = ref(true);
 const currentPage = ref(1);
 const itemsPerPage = 20;
+
+// Obtener las categorías al cargar el componente
+onMounted(async () => {
+  try {
+    await cargarCategorias();
+  } finally {
+    isLoading.value = false;
+  }
+});
 
 // Formulario de categoría
 const categoryForm = reactive({
@@ -148,9 +204,29 @@ const categoryErrors = reactive({
   nombre: ''
 });
 
+// Función para filtrar categorías por búsqueda
+const filtrarCategoriasPorBusqueda = (categorias, termino) => {
+  console.log('Categorías recibidas para filtrar:', categorias);
+  
+  if (!termino.trim()) return categorias;
+  
+  const terminoLower = termino.toLowerCase().trim();
+  return categorias.filter(categoria => {
+    return (
+      categoria.nombre?.toLowerCase().includes(terminoLower) ||
+      (categoria.descripcion && categoria.descripcion.toLowerCase().includes(terminoLower))
+    );
+  });
+};
+
+// Computed para categorías visibles según la búsqueda
+const categoriasVisibles = computed(() => {
+  return filtrarCategoriasPorBusqueda(categorias.value, searchTerm.value);
+});
+
 // Computed para paginación
 const totalPages = computed(() => {
-  return Math.ceil(categorias.value.length / itemsPerPage);
+  return Math.ceil(categoriasVisibles.value.length / itemsPerPage);
 });
 
 const startIndex = computed(() => {
@@ -158,12 +234,31 @@ const startIndex = computed(() => {
 });
 
 const endIndex = computed(() => {
-  return Math.min(startIndex.value + itemsPerPage, categorias.value.length);
+  return Math.min(startIndex.value + itemsPerPage, categoriasVisibles.value.length);
 });
 
 const categoriasPaginadas = computed(() => {
+<<<<<<< HEAD
   return categoriasFiltradas.value.slice(startIndex.value, endIndex.value);
+=======
+  return categoriasVisibles.value.slice(startIndex.value, endIndex.value);
+>>>>>>> 3c4aa8dec5b71f6ec1f0e26f38b3164ad69c81af
 });
+
+// Watch para resetear la página cuando cambie la búsqueda
+watch(searchTerm, () => {
+  currentPage.value = 1;
+});
+
+// Funciones de búsqueda
+const handleSearch = () => {
+  currentPage.value = 1;
+};
+
+const clearSearch = () => {
+  searchTerm.value = '';
+  currentPage.value = 1;
+};
 
 // Funciones de paginación
 const nextPage = () => {
@@ -270,7 +365,7 @@ const saveCategory = async () => {
       }
       
       // Log the data being sent for debugging
-      console.log('Updating category with ID:', idNum, 'Data:', categoriaData);
+
       
       response = await actualizarCategoria(idNum, {
         nombre: categoriaData.nombre,
@@ -293,21 +388,30 @@ const saveCategory = async () => {
       }
     }
     
-    // Force a refresh of the categories list
-    await cargarCategorias();
+    // Actualizar la lista de categorías localmente sin recargar todo
+    if (editingCategory.value) {
+      // Actualizar categoría existente
+      const index = categorias.value.findIndex(c => c.id === editingCategory.value.id);
+      if (index !== -1) {
+        categorias.value[index] = { ...categorias.value[index], ...categoriaData };
+      }
+    } else if (response && response.data) {
+      // Agregar nueva categoría
+      categorias.value.push(response.data);
+    }
     
-    // Close the modal after a short delay to show the success message
+    // Cerrar el modal después de un breve retraso para mostrar el mensaje de éxito
     setTimeout(() => {
       closeCategoryModal();
     }, 500);
   } catch (err) {
-    console.error('Error al guardar la categoría:', err);
+    // Error al guardar la categoría
     
     // Check for validation errors from the server
     if (err.response) {
       // Server responded with a status code outside the 2xx range
-      console.error('Error response data:', err.response.data);
-      console.error('Error status:', err.response.status);
+      // Error en la respuesta del servidor
+      // Código de estado del error
       
       // Handle specific error cases
       if (err.response.status === 400) {
@@ -336,17 +440,19 @@ const saveCategory = async () => {
       }
     } else if (err.request) {
       // The request was made but no response was received
-      console.error('No response received:', err.request);
+      // No se recibió respuesta del servidor
       proxy.$toast.error('No se pudo conectar con el servidor', 3000);
     } else if (err.message) {
       // Something happened in setting up the request
-      console.error('Request setup error:', err.message);
+      // Error al configurar la petición
       
       // Show user-friendly error messages for known errors
       if (err.message.includes('ID de categoría')) {
         proxy.$toast.error(err.message, 3000);
+      } else if (err.message.includes('Error al crear la categoría') || err.message.includes('Error al actualizar la categoría')) {
+        proxy.$toast.error(err.message, 3000);
       } else {
-        proxy.$toast.error('Error al procesar la solicitud', 3000);
+        proxy.$toast.error('Error inesperado: ' + err.message, 3000);
       }
     } else {
       // Unknown error

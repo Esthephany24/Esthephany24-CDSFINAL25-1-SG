@@ -74,3 +74,22 @@
     display: block;
   }
   
+  /* Tooltip para celdas con texto truncado */
+  .table td {
+    position: relative;
+  }
+  
+  .table td .cell-content {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+  
+  /* Tooltips deshabilitados temporalmente */
+  .table td .tooltip {
+    display: none;
+  }
+  

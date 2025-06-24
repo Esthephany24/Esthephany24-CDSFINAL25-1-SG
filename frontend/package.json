@@ -13,7 +13,9 @@
   "dependencies": {
     "axios": "^1.9.0",
     "lucide-vue-next": "^0.511.0",
-    "vue": "^3.5.13"
+    "pinia": "^2.1.7",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
@@ -23,6 +25,7 @@
     "eslint-plugin-vue": "~10.0.0",
     "globals": "^16.0.0",
     "prettier": "3.5.3",
+    "terser": "^5.43.1",
     "vite": "^6.2.4",
     "vite-plugin-vue-devtools": "^7.7.2"
   }

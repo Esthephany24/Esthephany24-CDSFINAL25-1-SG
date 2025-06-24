@@ -7,7 +7,7 @@ const ProductoService = {
       const response = await api.get('/productos');
       return response.data;
     } catch (error) {
-      console.error('Error al obtener los productos:', error);
+
       throw error;
     }
   },
@@ -18,7 +18,7 @@ const ProductoService = {
       const response = await api.get('/productos/no-disponibles');
       return response.data;
     } catch (error) {
-      console.error('Error al obtener productos no disponibles:', error);
+
       throw error;
     }
   },
@@ -29,7 +29,7 @@ const ProductoService = {
       const response = await api.get(`/productos/existe-nombre/${encodeURIComponent(nombre)}`);
       return response.data;
     } catch (error) {
-      console.error('Error al verificar el nombre del producto:', error);
+
       throw error;
     }
   },
@@ -40,7 +40,7 @@ const ProductoService = {
       const response = await api.get(`/productos/existe-id/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error al verificar el ID del producto:', error);
+
       throw error;
     }
   },
@@ -51,7 +51,7 @@ const ProductoService = {
       const response = await api.get(`/productos/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error al obtener el producto por ID:', error);
+
       throw error;
     }
   },
@@ -59,10 +59,18 @@ const ProductoService = {
   // Crear un nuevo producto
   crear: async (productoData) => {
     try {
-      const response = await api.post('/productos', productoData);
+      // Convertir descripción vacía a null
+      const descripcion = productoData.descripcion === '' ? null : productoData.descripcion;
+      // Asegurarse de que el estado siempre esté definido
+      const dataToSend = {
+        ...productoData,
+        descripcion,
+        estado: 'disponible' // Estado por defecto
+      };
+      const response = await api.post('/productos', dataToSend);
       return response.data;
     } catch (error) {
-      console.error('Error al crear el producto:', error);
+
       throw error;
     }
   },
@@ -70,10 +78,18 @@ const ProductoService = {
   // Actualizar un producto existente
   actualizar: async (id, productoData) => {
     try {
-      const response = await api.put(`/productos/${id}`, productoData);
+      // Convertir descripción vacía a null
+      const descripcion = productoData.descripcion === '' ? null : productoData.descripcion;
+      // Asegurarse de que el estado siempre esté definido
+      const dataToSend = {
+        ...productoData,
+        descripcion,
+        estado: 'disponible' // Estado por defecto
+      };
+      const response = await api.put(`/productos/${id}`, dataToSend);
       return response.data;
     } catch (error) {
-      console.error('Error al actualizar el producto:', error);
+
       throw error;
     }
   },
