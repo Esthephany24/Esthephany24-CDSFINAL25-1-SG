@@ -1,0 +1,91 @@
+CREATE TABLE IF NOT EXISTS UsuariosSistema (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    dni CHAR(8) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    contraseña_hash VARCHAR(255) NOT NULL,
+    rol ENUM('admin', 'empleado', 'cliente') NOT NULL, -- sin DEFAULT
+    fecha_registro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (dni) REFERENCES Personas(dni) ON UPDATE CASCADE
+);
+
+DELIMITER //
+
+CREATE PROCEDURE RegistrarNuevoUsuario (
+    IN p_dni CHAR(8),
+    IN p_nombre VARCHAR(20),
+    IN p_apellido_paterno VARCHAR(20),
+    IN p_apellido_materno VARCHAR(20),
+    IN p_fecha_nacimiento DATE,
+    IN p_telefono CHAR(9),
+    IN p_direccion VARCHAR(100),
+    IN p_email VARCHAR(100),
+    IN p_contraseña_hash VARCHAR(255),
+    IN p_rol ENUM('admin', 'empleado', 'cliente')
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+
+    -- Validar que el DNI no exista ya en Personas
+    IF EXISTS (SELECT 1 FROM Personas WHERE dni = p_dni) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'El DNI ya está registrado.';
+    END IF;
+
+    -- Validar que el email no exista ya en UsuariosSistema
+    IF EXISTS (SELECT 1 FROM UsuariosSistema WHERE email = p_email) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'El correo electrónico ya está en uso.';
+    END IF;
+
+    -- Validar que el teléfono no exista ya en Telefonos_Personas
+    IF EXISTS (SELECT 1 FROM Telefonos_Personas WHERE telefono = p_telefono) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'El número de teléfono ya está registrado.';
+    END IF;
+
+    START TRANSACTION;
+
+    -- Insertar en Personas
+    INSERT INTO Personas (
+        dni, nombre, apellido_paterno, apellido_materno, fecha_nacimiento
+    ) VALUES (
+        p_dni, p_nombre, p_apellido_paterno, p_apellido_materno, p_fecha_nacimiento
+    );
+
+    -- Insertar en Telefonos_Personas
+    INSERT INTO Telefonos_Personas (
+        telefono, dni
+    ) VALUES (
+        p_telefono, p_dni
+    );
+
+    -- Insertar en Direcciones_Personas
+    INSERT INTO Direcciones_Personas (
+        dni, direccion
+    ) VALUES (
+        p_dni, p_direccion
+    );
+
+    -- Si es cliente, insertar en Clientes
+    IF p_rol = 'cliente' THEN
+        INSERT INTO Clientes (dni) VALUES (p_dni);
+    ELSE
+        -- Si es empleado o admin, insertar en Empleados
+        INSERT INTO Empleados (dni) VALUES (p_dni);
+    END IF;
+
+    -- Insertar en UsuariosSistema
+    INSERT INTO UsuariosSistema (
+        dni, email, contraseña_hash, rol
+    ) VALUES (
+        p_dni, p_email, p_contraseña_hash, p_rol
+    );
+
+    COMMIT;
+END;
+//
+
+DELIMITER ;

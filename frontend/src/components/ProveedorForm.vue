@@ -15,7 +15,7 @@ const form = reactive({
 });
 
 const handleSubmit = async () => {
-  await fetch('http://localhost:4000/api/proveedores', {
+  await fetch('http://localhost:3000/api/proveedores', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(form)

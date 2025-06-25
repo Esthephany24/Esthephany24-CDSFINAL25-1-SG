@@ -1,31 +1,52 @@
-const API = 'http://localhost:4000/api/personas';
+import api from './api';
 
-export async function getPersonas() {
-  const res = await fetch(API);
-  return await res.json();
-}
+const PersonaService = {
+  // Obtener todas las personas
+  obtenerTodas: async () => {
+      const response = await api.get('/personas');
+      return response.data;
+    }
+  };
+  /*
+  // Obtener una persona por DNI
+  obtenerPorDni: async (dni) => {
+    try {
+      const response = await api.get(`/personas/${dni}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 
-export async function getPersona(dni) {
-  const res = await fetch(`${API}/${dni}`);
-  return await res.json();
-}
+  // Crear una nueva persona
+  crear: async (personaData) => {
+    try {
+      const response = await api.post('/personas', personaData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 
-export async function createPersona(data) {
-  await fetch(API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-}
+  // Actualizar una persona existente
+  actualizar: async (dni, personaData) => {
+    try {
+      const response = await api.put(`/personas/${dni}`, personaData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 
-export async function updatePersona(dni, data) {
-  await fetch(`${API}/${dni}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-}
+  // Eliminar una persona
+  eliminar: async (dni) => {
+    try {
+      const response = await api.delete(`/personas/${dni}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+};*/
 
-export async function deletePersona(dni) {
-  await fetch(`${API}/${dni}`, { method: 'DELETE' });
-}
+export default PersonaService;

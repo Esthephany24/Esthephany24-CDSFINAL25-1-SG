@@ -29,8 +29,8 @@ watch(() => props.empleado, (val) => {
 
 const handleSubmit = async () => {
   const url = props.empleado
-    ? `http://localhost:4000/api/empleados/${props.empleado.cod_empleado}`
-    : 'http://localhost:4000/api/empleados';
+    ? `http://localhost:3000/api/empleados/${props.empleado.cod_empleado}`
+    : 'http://localhost:3000/api/empleados';
   const method = props.empleado ? 'PUT' : 'POST';
   await fetch(url, {
     method,

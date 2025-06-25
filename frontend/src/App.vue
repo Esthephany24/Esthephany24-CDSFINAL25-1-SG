@@ -26,13 +26,15 @@
         </div>
       </main>
     </div>
+
+    
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, nextTick, provide } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { Package, Layers, Tag, Truck } from 'lucide-vue-next';
+import { Package, Layers, Tag, Truck, User, Users, FileText, LogOut } from 'lucide-vue-next';
 import Sidebar from './components/Sidebar.vue';
 import Navbar from './components/Navbar.vue';
 import GlobalLoading from './components/GlobalLoading.vue';
@@ -60,7 +62,7 @@ router.afterEach(() => {
 // Datos del usuario actual
 const currentUser = ref({
   name: 'Admin',
-  email: 'admin@example.com',
+  email: 'erika@chavez.com',
   avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
 });
 
@@ -70,6 +72,9 @@ const tabs = [
   { id: 'lineas', label: 'Líneas', icon: Layers, route: '/lineas' },
   { id: 'categorias', label: 'Categorías', icon: Tag, route: '/categorias' },
   { id: 'proveedores', label: 'Proveedores', icon: Truck, route: '/proveedores' },
+  { id: 'personas', label: 'Personas', icon: User, route: '/personas' },
+  { id: 'clientes', label: 'Clientes', icon: Users, route: '/clientes' },
+  { id: 'contratos', label: 'Contratos', icon: FileText, route: '/contratos' }, // Nueva pestaña para Contratos
 ];
 
 // Pestaña activa basada en la ruta actual
@@ -79,6 +84,9 @@ const activeTab = computed(() => {
   if (path.startsWith('/lineas')) return 'lineas';
   if (path.startsWith('/categorias')) return 'categorias';
   if (path.startsWith('/proveedores')) return 'proveedores';
+  if (path.startsWith('/personas')) return 'personas';
+  if (path.startsWith('/clientes')) return 'clientes';
+  if (path.startsWith('/contratos')) return 'contratos'; // Nueva condición para Contratos
   return 'productos';
 });
 
@@ -88,6 +96,11 @@ onMounted(() => {
     router.push('/productos');
   }
 });
+
+// Función para cerrar sesión
+function logout() {
+  // Lógica para cerrar sesión (borrar token, redirigir, etc)
+}
 </script>
 
 <style>

@@ -4,19 +4,6 @@
       <div class="card-header">
         <div class="card-header-content">
           <h3>Categorías</h3>
-<<<<<<< HEAD
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Buscar categoría..."
-            class="search-input"
-            style="margin-right: 1rem; min-width: 200px;"
-          />
-          <button @click="openCategoryModal()" class="button primary">
-            <Plus class="icon-small" />
-            Nueva Categoría
-          </button>
-=======
           <div class="header-actions">
             <!-- Buscador -->
             <div class="search-container">
@@ -44,7 +31,6 @@
               Nueva Categoría
             </button>
           </div>
->>>>>>> 3c4aa8dec5b71f6ec1f0e26f38b3164ad69c81af
         </div>
       </div>
       <!-- Indicador de carga -->
@@ -148,6 +134,7 @@ import { ref, reactive, computed, onMounted, getCurrentInstance, watch } from 'v
 import { Plus, Edit, Grid, Search, X } from 'lucide-vue-next';
 import CategoryModal from '../components/CategoryModal.vue';
 import { useCategorias } from '../composables/useApi.js';
+import CategoriaService from '../services/categoriaService';
 
 const searchQuery = ref('');
 
@@ -159,18 +146,9 @@ const categoriasFiltradas = computed(() => {
 });
 
 // Usar el composable para categorías
-HEAD
-const { categorias, loading, error, crearCategoria, actualizarCategoria, eliminarCategoria, verificarNombreCategoria } = useCategorias();
-const { 
-  categorias, 
-  loading, 
-  error, 
-  cargarCategorias,
-  crearCategoria, 
-  actualizarCategoria, 
-  verificarNombreCategoria 
-} = useCategorias();
-3a40d9ab30808b754c82a71d07f211c2effea0a9
+
+const { categorias, loading, error, crearCategoria, actualizarCategoria, eliminarCategoria, verificarNombreCategoria,cargarCategorias } = useCategorias();
+
 
 // Estados para modales
 const showCategoryModal = ref(false);
@@ -186,11 +164,8 @@ const itemsPerPage = 20;
 
 // Obtener las categorías al cargar el componente
 onMounted(async () => {
-  try {
-    await cargarCategorias();
-  } finally {
-    isLoading.value = false;
-  }
+  await cargarCategorias(); // Solo usa el método del composable
+  isLoading.value = false;
 });
 
 // Formulario de categoría
@@ -238,11 +213,7 @@ const endIndex = computed(() => {
 });
 
 const categoriasPaginadas = computed(() => {
-<<<<<<< HEAD
-  return categoriasFiltradas.value.slice(startIndex.value, endIndex.value);
-=======
   return categoriasVisibles.value.slice(startIndex.value, endIndex.value);
->>>>>>> 3c4aa8dec5b71f6ec1f0e26f38b3164ad69c81af
 });
 
 // Watch para resetear la página cuando cambie la búsqueda
@@ -461,24 +432,6 @@ const saveCategory = async () => {
   }
 };
 
-<<<<<<< HEAD
-// Eliminar categoría
-const deleteCategory = async (id) => {
-  if (confirm('¿Estás seguro de que deseas eliminar esta categoría?')) {
-    try {
-      await eliminarCategoria(id);
-    } catch (err) {
-      alert('Error al eliminar la categoría');
-    }
-  }
-};
-
-onMounted(() => {
-  // Trigger the composable to fetch categories on component mount
-  useCategorias();
-});
-=======
->>>>>>> 3a40d9ab30808b754c82a71d07f211c2effea0a9
 </script>
 
 <style scoped>

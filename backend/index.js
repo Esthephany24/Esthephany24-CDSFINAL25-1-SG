@@ -8,10 +8,15 @@ require('dotenv').config({ path: '.env.local' });
 const database = require('./src/config/Database');
 
 // Rutas
+const clienteRoutes = require('./src/routes/ClienteRoute');
+const empleadoRoutes = require('./src/routes/EmpleadoRoute');
 const productoRoutes = require('./src/routes/ProductoRoute');
 const lineaRoutes = require('./src/routes/LineaRoute');
 const categoriaRoutes = require('./src/routes/CategoriaRoute');
 const proveedorRoutes = require('./src/routes/ProveedorRoute');
+const personaRoutes = require('./src/routes/PersonaRoute');
+const contratoRoutes = require('./src/routes/ContratoRoute');
+const authRoutes = require('./src/routes/AuthRoute');
 
 const app = express();
 
@@ -71,6 +76,11 @@ app.use('/api/productos', productoRoutes);
 app.use('/api/lineas', lineaRoutes);
 app.use('/api/categorias', categoriaRoutes);
 app.use('/api/proveedores', proveedorRoutes);
+app.use('/api/clientes', clienteRoutes);
+app.use('/api/empleados', empleadoRoutes);
+app.use('/api/personas', personaRoutes);
+app.use('/api/contratos', contratoRoutes);
+app.use('/api/auth', authRoutes);
 
 // Puerto
 const PORT = process.env.PORT || 3000;
@@ -108,6 +118,11 @@ const server = app.listen(PORT, async () => {
   console.log(`   - GET  /api/lineas        Obtener líneas`);
   console.log(`   - GET  /api/categorias    Obtener categorías`);
   console.log(`   - GET  /api/proveedores   Obtener proveedores`);
+  console.log(`   - GET  /api/clientes      Obtener clientes`);
+  console.log(`   - GET  /api/empleados     Obtener empleados`);
+  console.log(`   - GET  /api/personas      Obtener personas`); 
+  console.log(`   - GET  /api/contratos     Obtener contratos`);
+  
   console.log('='.repeat(60));
 });
 

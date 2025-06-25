@@ -93,3 +93,28 @@
     display: none;
   }
   
+  .full-width {
+  max-width: none !important;
+  width: 100%;
+}
+.icon-btn {
+  background: #1aa852;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.icon-btn:hover {
+  background: #158a41;
+}
+.logout-btn {
+  background: #e53935;
+}
+.logout-btn:hover {
+  background: #b71c1c;
+}

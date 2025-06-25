@@ -1,79 +1,104 @@
 <template>
-  <div class="sidebar-container">
-    <!-- Desktop Sidebar -->
-    <div class="sidebar">
-      <div class="logo">
-        <h1>FabiaNatura</h1>
-      </div>
-      <nav class="sidebar-nav">
-        <router-link 
-          v-for="(tab, index) in tabs" 
-          :key="index" 
-          :to="tab.route"
-          class="sidebar-item"
+  <div class="sidebar">
+    <nav class="sidebar-nav">
+      <ul>
+        <li
+          v-for="tab in tabs"
+          :key="tab.id"
           :class="{ active: activeTab === tab.id }"
+          @click="goTo(tab.route)"
+          class="sidebar-item"
         >
-          <component :is="tab.icon" class="icon" />
+          <component :is="tab.icon" class="sidebar-icon" />
           <span>{{ tab.label }}</span>
-        </router-link>
-      </nav>
-    </div>
+        </li>
+      </ul>
+      <!-- Botones en la parte inferior -->
+      <div class="sidebar-bottom">
+        <button class="icon-btn" @click="goTo('/login')" title="Iniciar sesión">
+          <LogIn size="20" />
+        </button>
+        <button class="icon-btn" @click="goTo('/signup')" title="Registrarse">
+          <UserPlus size="20" />
+        </button>
+        <button class="icon-btn logout-btn" @click="logout" title="Cerrar sesión">
+          <LogOut size="18" />
+        </button>
+      </div>
+    </nav>
   </div>
 </template>
 
 <script setup>
-import { Menu, X } from 'lucide-vue-next';
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { LogIn, UserPlus, LogOut } from 'lucide-vue-next';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-const route = useRoute();
+const router = useRouter();
 
 const props = defineProps({
-  tabs: {
-    type: Array,
-    required: true
-  }
+  tabs: Array,
+  activeTab: String
 });
 
-// Determinar la pestaña activa basada en la ruta actual
-const activeTab = computed(() => {
-  const path = route.path;
-  if (path.startsWith('/productos')) return 'productos';
-  if (path.startsWith('/lineas')) return 'lineas';
-  if (path.startsWith('/categorias')) return 'categorias';
-  if (path.startsWith('/proveedores')) return 'proveedores';
-  return 'productos';
-});
+function goTo(route) {
+  router.push(route);
+}
+
+function logout() {
+  localStorage.removeItem('user');
+  router.push('/login');
+}
+
+const handleLinkClick = () => {
+  if (window.innerWidth <= 768) {
+    console.log("Cierra sidebar en móvil");
+  }
+};
 </script>
 
 <style scoped>
-@import '../styles/components/Sidebar.css';
-
-/* Estilos para los enlaces del router */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.sidebar-bottom {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+.sidebar {
+  width: 200px;
+  background-color: #f9f9f9;
+  padding: 1rem;
+}
 .sidebar-item {
-  text-decoration: none;
-  color: inherit;
   display: flex;
   align-items: center;
-  padding: 0.75rem 1rem;
-  border-radius: 0.375rem;
-  transition: all 0.2s;
-  margin-bottom: 0.25rem;
+  padding: 0.5rem;
+  text-decoration: none;
+  color: #333;
 }
-
-.sidebar-item:hover {
-  background-color: #f3f4f6;
-}
-
 .sidebar-item.active {
-  background-color: #e5e7eb;
-  font-weight: 500;
-  color: #111827;
+  font-weight: bold;
+  background-color: #eee;
 }
-
-.sidebar-item .icon {
-  margin-right: 0.75rem;
-  width: 1.25rem;
-  height: 1.25rem;
+.icon {
+  margin-right: 0.5rem;
+}
+.logout-btn {
+  background: #e53935;
+}
+.logout-btn:hover {
+  background: #d32f2f;
 }
 </style>

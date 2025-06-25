@@ -12,11 +12,40 @@ class Persona {
   }
 
   static async AgregarPersona(data) {
-    const { dni, nombre, apellido_paterno, apellido_materno, fecha_nacimiento } = data;
-    await database.pool.query(
-      'INSERT INTO Personas (dni, nombre, apellido_paterno, apellido_materno, fecha_nacimiento) VALUES (?, ?, ?, ?, ?)',
-      [dni, nombre, apellido_paterno, apellido_materno, fecha_nacimiento]
-    );
+    const {
+      dni,
+      nombre,
+      apellido_paterno,
+      apellido_materno,
+      fecha_nacimiento,
+      direccion,
+      telefono
+    } = data;
+
+    const connection = await database.pool.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      await connection.query(
+        'INSERT INTO Personas (dni, nombre, apellido_paterno, apellido_materno, fecha_nacimiento) VALUES (?, ?, ?, ?, ?)',
+        [dni, nombre, apellido_paterno, apellido_materno, fecha_nacimiento]
+      );
+
+      if (direccion) {
+        await connection.query('CALL AgregarDireccionPersona(?, ?)', [dni, direccion]);
+      }
+
+      if (telefono) {
+        await connection.query('CALL AgregarTelefonoPersona(?, ?)', [dni, telefono]);
+      }
+
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 
   static async ActualizarPersona(dni, data) {

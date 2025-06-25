@@ -4,21 +4,8 @@
       <div class="card-header">
         <div class="card-header-content">
           <h3>Productos</h3>
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Buscar producto..."
-            class="search-input"
-            style="margin-right: 1rem; min-width: 200px;"
-          />
+          
           <div class="header-actions">
-<<<<<<< HEAD
-            <button 
-              @click="toggleProductosAgotados" 
-              class="button secondary"
-              :class="{ 'agotados-activo': showProductosAgotados }"
-            >
-=======
             <!-- Buscador -->
             <div class="search-container">
               <div class="search-input-wrapper">
@@ -41,7 +28,6 @@
             </div>
             
             <button @click="toggleProductosAgotados" class="button secondary">
->>>>>>> 3c4aa8dec5b71f6ec1f0e26f38b3164ad69c81af
               <Eye v-if="showProductosAgotados" class="icon-small" />
               <AlertTriangle v-else class="icon-small" />
               {{ showProductosAgotados ? 'Ver Todos' : 'Ver Agotados' }}
@@ -184,6 +170,10 @@ import { ref, reactive, computed, onMounted, getCurrentInstance, watch } from 'v
 import { Plus, Edit, AlertTriangle, Package, Eye, Search, X } from 'lucide-vue-next';
 import ProductModal from '../components/ProductModal.vue';
 import { useProductos, useCategorias, useLineas } from '../composables/useApi.js';
+import ProductoService from '../services/productoService';
+
+//para search query
+const searchQuery = ref('');
 
 // Get app instance for toast
 const { proxy } = getCurrentInstance();
@@ -200,6 +190,9 @@ onMounted(async () => {
     cargarLineas(),
     cargarProductos()
   ]);
+
+  // Cargar productos usando el servicio
+  productos.value = await ProductoService.obtenerTodos();
 });
 
 // Estados para modales
@@ -235,25 +228,6 @@ const productErrors = reactive({
   stock: ''
 });
 
-<<<<<<< HEAD
-// Estado para búsqueda
-const searchQuery = ref('');
-
-// Computed para productos visibles según el filtro y búsqueda
-const productosVisibles = computed(() => {
-  let filtered = showProductosAgotados.value
-    ? productos.value.filter(producto => producto.stock === 0)
-    : productos.value.filter(producto => producto.stock > 0);
-
-  if (searchQuery.value.trim() !== '') {
-    const q = searchQuery.value.trim().toLowerCase();
-    filtered = filtered.filter(producto =>
-      producto.nombre.toLowerCase().includes(q) ||
-      (producto.descripcion && producto.descripcion.toLowerCase().includes(q))
-    );
-  }
-  return filtered;
-=======
 // Función para filtrar productos por búsqueda
 const filtrarProductosPorBusqueda = (productos, termino) => {
   if (!termino.trim()) return productos;
@@ -282,7 +256,6 @@ const productosVisibles = computed(() => {
   
   // Aplicar filtro de búsqueda
   return filtrarProductosPorBusqueda(productosBase, searchTerm.value);
->>>>>>> 3c4aa8dec5b71f6ec1f0e26f38b3164ad69c81af
 });
 
 // Computed para paginación
@@ -495,7 +468,7 @@ const saveProduct = async (productoData) => {
 .search-input {
   padding: 0.5rem 1rem;
   border: 1px solid #ccc;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 1rem;
   outline: none;
   transition: border-color 0.2s;

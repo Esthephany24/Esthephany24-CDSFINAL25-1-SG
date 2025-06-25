@@ -36,3 +36,189 @@
 .modal-body {
   padding: 1.5rem;
 }
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-container {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  min-width: 320px;
+  max-width: 420px;
+  width: 100%;
+  padding: 1.5rem;
+  position: relative;
+  animation: fadeIn 0.2s;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.modal-header .icon {
+  font-size: 1.5rem;
+}
+.modal-body {
+  margin-bottom: 1rem;
+}
+.modal-footer, .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.7rem;
+}
+.form-group {
+  margin-bottom: 1rem;
+}
+.form-control {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+.error-message {
+  color: #e53935;
+  font-size: 0.95em;
+  margin-bottom: 8px;
+}
+.button.primary {
+  background: hsl(126, 62%, 37%);
+  color: #fff;
+  white-space: nowrap;
+}
+.button.secondary {
+  background: #eee;
+  color: #333;
+}
+.button.danger {
+  background: #e53935;
+  color: #fff;
+}
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-button.edit { color: #1976d2; }
+.icon-button.delete { color: #e53935; }
+.icon-button svg { width: 20px; height: 20px; }
+.table-container {
+  padding: 0 16px 16px 16px;
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  min-width: 700px;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+.table th, .table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  white-space: nowrap;
+}
+.success-message {
+  color: #4caf50;
+  text-align: center;
+  padding: 10px 24px;
+  border: 1px solid #4caf50;
+  border-radius: 4px;
+  margin-top: 10px;
+  background: #e8f5e9;
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  z-index: 2000;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(76,175,80,0.08);
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.97);}
+  to { opacity: 1; transform: scale(1);}
+}
+.fila-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* <-- Esto alinea los extremos */
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.fila-header h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+.search-container {
+  flex: 1 1 300px;
+  max-width: 350px;
+}
+
+/* Mejora el input de búsqueda */
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 36px 8px 36px; /* espacio para el icono */
+  border-radius: 24px;         /* más redondeado */
+  border: 1px solid #d1d5db;
+  box-shadow: 0 2px 8px rgba(60,60,60,0.10);
+  background: #fff;
+  font-size: 1rem;
+  transition: box-shadow 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  box-shadow: 0 4px 16px rgba(60,60,60,0.16);
+  border-color: #1976d2;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: #1976d2;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+
+.clear-search-button {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>

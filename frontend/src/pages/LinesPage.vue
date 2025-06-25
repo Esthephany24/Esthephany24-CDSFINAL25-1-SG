@@ -135,6 +135,7 @@ import { ref, reactive, computed, onMounted, getCurrentInstance, watch } from 'v
 import { Plus, Edit, Tag, Search, X } from 'lucide-vue-next';
 import LineModal from '../components/LineModal.vue';
 import { useLineas } from '../composables/useApi.js';
+import LineaService from '../services/lineaService';
 
 // Obtener la instancia actual para acceder al plugin de toast
 const { proxy } = getCurrentInstance();
@@ -385,7 +386,9 @@ const saveLine = async () => {
   }
 };
 
-onMounted(() => {
+// Cargar líneas al montar el componente
+onMounted(async () => {
+  lineas.value = await LineaService.obtenerTodas();
   cargarLineas();
 });
 </script>

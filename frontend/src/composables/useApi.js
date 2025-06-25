@@ -1,8 +1,10 @@
-import { ref, onMounted } from "vue"
+import { ref, onMounted } from 'vue';
 import ProductoService from "../services/productoService"
 import CategoriaService from "../services/categoriaService"
 import LineaService from "../services/lineaService"
 import ProveedorService from "../services/proveedorService"
+import axios from "axios"
+import PersonaService from '../services/personaService'
 
 export function useProductos() {
   const productos = ref([])
@@ -285,4 +287,41 @@ export function useLineas() {
     actualizarLinea,
     verificarNombreLinea,
   }
+}
+
+// src/composables/useApi.js
+
+export function usePersonas() {
+  const personas = ref([]);
+  const loading = ref(false);
+  const error = ref(null);
+
+  const cargarPersonas = async () => {
+    loading.value = true;
+    try {
+      personas.value = await PersonaService.obtenerTodas();
+    } catch (err) {
+      error.value = err;
+      console.error('Error al cargar personas:', err);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const crearPersona = async (nuevaPersona) => {
+    await PersonaService.crear(nuevaPersona);
+  };
+
+  const actualizarPersona = async (dni, datosActualizados) => {
+    await PersonaService.actualizar(dni, datosActualizados);
+  };
+
+  return {
+    personas,
+    loading,
+    error,
+    cargarPersonas,
+    crearPersona,
+    actualizarPersona
+  };
 }
