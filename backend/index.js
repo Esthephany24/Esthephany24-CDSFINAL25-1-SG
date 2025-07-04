@@ -24,7 +24,8 @@ const app = express();
 const corsOptions = {
   origin: [
     'https://fabianatura.vercel.app',
-    'http://localhost:5173'
+    'http://localhost:5173',
+    'https://sistemagestion-i3rlft3zc-esthephany24s-projects.vercel.app' // <--- AGREGA ESTE
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
