@@ -25,7 +25,8 @@ const corsOptions = {
   origin: [
     'https://fabianatura.vercel.app',
     'http://localhost:5173',
-    'https://sistemagestion-i3rlft3zc-esthephany24s-projects.vercel.app' // <--- AGREGA ESTE
+    'https://sistemagestion-i3rlft3zc-esthephany24s-projects.vercel.app',
+    'https://sistemagestion.vercel.app' // <---  ESTE
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
