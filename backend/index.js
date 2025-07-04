@@ -49,6 +49,11 @@ console.log('Configuración CORS:', {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// 👉 Aquí ruta de prueba
+app.get('/', (req, res) => {
+  res.send('🚀 Backend funcionando correctamente!');
+});
+
 // Ruta de verificación de salud de la base de datos
 app.get('/api/health', async (req, res) => {
   try {
