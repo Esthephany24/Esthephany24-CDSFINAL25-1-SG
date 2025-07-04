@@ -8,6 +8,7 @@
 
 <script setup>
 import { reactive } from 'vue';
+import API_BASE_URL from '../services/apiBase';
 
 const form = reactive({
   ruc: '',
@@ -15,7 +16,7 @@ const form = reactive({
 });
 
 const handleSubmit = async () => {
-  await fetch('http://localhost:3000/api/proveedores', {
+  await fetch(`${API_BASE_URL}/proveedores`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(form)

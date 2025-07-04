@@ -1,98 +1,66 @@
-import api from './api';
+import API_BASE_URL from './apiBase';
 
 const ProductoService = {
   // Obtener todos los productos
   obtenerTodos: async () => {
-    try {
-      const response = await api.get('/productos');
-      return response.data;
-    } catch (error) {
-
-      throw error;
-    }
+    const res = await fetch(`${API_BASE_URL}/productos`);
+    if (!res.ok) throw new Error('Error al obtener productos');
+    return await res.json();
   },
 
   // Obtener productos no disponibles
   obtenerNoDisponibles: async () => {
-    try {
-      const response = await api.get('/productos/no-disponibles');
-      return response.data;
-    } catch (error) {
-
-      throw error;
-    }
+    const res = await fetch(`${API_BASE_URL}/productos/no-disponibles`);
+    if (!res.ok) throw new Error('Error al obtener productos no disponibles');
+    return await res.json();
   },
 
   // Verificar si un nombre de producto existe
   verificarNombre: async (nombre) => {
-    try {
-      const response = await api.get(`/productos/existe-nombre/${encodeURIComponent(nombre)}`);
-      return response.data;
-    } catch (error) {
-
-      throw error;
-    }
+    const res = await fetch(`${API_BASE_URL}/productos/existe-nombre/${encodeURIComponent(nombre)}`);
+    if (!res.ok) throw new Error('Error al verificar nombre');
+    return await res.json();
   },
 
   // Verificar si un ID de producto existe
   verificarId: async (id) => {
-    try {
-      const response = await api.get(`/productos/existe-id/${id}`);
-      return response.data;
-    } catch (error) {
-
-      throw error;
-    }
+    const res = await fetch(`${API_BASE_URL}/productos/existe-id/${id}`);
+    if (!res.ok) throw new Error('Error al verificar ID');
+    return await res.json();
   },
 
   // Obtener un producto por ID
   obtenerPorId: async (id) => {
-    try {
-      const response = await api.get(`/productos/${id}`);
-      return response.data;
-    } catch (error) {
-
-      throw error;
-    }
+    const res = await fetch(`${API_BASE_URL}/productos/${id}`);
+    if (!res.ok) throw new Error('Error al obtener producto');
+    return await res.json();
   },
 
   // Crear un nuevo producto
   crear: async (productoData) => {
-    try {
-      // Convertir descripción vacía a null
-      const descripcion = productoData.descripcion === '' ? null : productoData.descripcion;
-      // Asegurarse de que el estado siempre esté definido
-      const dataToSend = {
-        ...productoData,
-        descripcion,
-        estado: 'disponible' // Estado por defecto
-      };
-      const response = await api.post('/productos', dataToSend);
-      return response.data;
-    } catch (error) {
-
-      throw error;
-    }
+    const descripcion = productoData.descripcion === '' ? null : productoData.descripcion;
+    const dataToSend = { ...productoData, descripcion, estado: 'disponible' };
+    const res = await fetch(`${API_BASE_URL}/productos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dataToSend)
+    });
+    if (!res.ok) throw new Error('Error al crear producto');
+    return await res.json();
   },
 
   // Actualizar un producto existente
   actualizar: async (id, productoData) => {
-    try {
-      // Convertir descripción vacía a null
-      const descripcion = productoData.descripcion === '' ? null : productoData.descripcion;
-      // Asegurarse de que el estado siempre esté definido
-      const dataToSend = {
-        ...productoData,
-        descripcion,
-        estado: 'disponible' // Estado por defecto
-      };
-      const response = await api.put(`/productos/${id}`, dataToSend);
-      return response.data;
-    } catch (error) {
-
-      throw error;
-    }
-  },
+    const descripcion = productoData.descripcion === '' ? null : productoData.descripcion;
+    const dataToSend = { ...productoData, descripcion, estado: 'disponible' };
+    const res = await fetch(`${API_BASE_URL}/productos/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dataToSend)
+    });
+    if (!res.ok) throw new Error('Error al actualizar producto');
+    return await res.json();
+  }
 };
 
 export default ProductoService;

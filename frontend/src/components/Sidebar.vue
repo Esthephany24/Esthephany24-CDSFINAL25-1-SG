@@ -15,13 +15,13 @@
       </ul>
       <!-- Botones en la parte inferior -->
       <div class="sidebar-bottom">
-        <button class="icon-btn" @click="goTo('/login')" title="Iniciar sesión">
+        <button v-if="!isLoggedIn" class="icon-btn" @click="goTo('/login')" title="Iniciar sesión">
           <LogIn size="20" />
         </button>
-        <button class="icon-btn" @click="goTo('/signup')" title="Registrarse">
+        <button v-if="!isLoggedIn" class="icon-btn" @click="goTo('/signup')" title="Registrarse">
           <UserPlus size="20" />
         </button>
-        <button class="icon-btn logout-btn" @click="logout" title="Cerrar sesión">
+        <button v-if="isLoggedIn" class="icon-btn logout-btn" @click="logout" title="Cerrar sesión">
           <LogOut size="18" />
         </button>
       </div>
@@ -31,7 +31,7 @@
 
 <script setup>
 import { LogIn, UserPlus, LogOut } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -41,20 +41,29 @@ const props = defineProps({
   activeTab: String
 });
 
+const isLoggedIn = ref(!!localStorage.getItem('user'));
+
+function updateLoginState() {
+  isLoggedIn.value = !!localStorage.getItem('user');
+}
+
 function goTo(route) {
   router.push(route);
+  setTimeout(updateLoginState, 100); // Asegura actualización tras login/registro
 }
 
 function logout() {
   localStorage.removeItem('user');
+  updateLoginState();
   router.push('/login');
 }
 
-const handleLinkClick = () => {
-  if (window.innerWidth <= 768) {
-    console.log("Cierra sidebar en móvil");
-  }
-};
+onMounted(() => {
+  window.addEventListener('storage', updateLoginState);
+});
+onUnmounted(() => {
+  window.removeEventListener('storage', updateLoginState);
+});
 </script>
 
 <style scoped>

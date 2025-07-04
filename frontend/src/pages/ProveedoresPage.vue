@@ -234,11 +234,15 @@ const editarProveedor = (proveedor) => {
 
 const saveProveedor = async (proveedorData) => {
   try {
-    // Aquí iría la lógica para guardar el proveedor
-    // Por ahora solo mostramos un mensaje de éxito
-    toast.success('Proveedor guardado correctamente');
-    
-    // Recargar la lista
+    if (proveedorData.ruc && proveedores.value.some(p => p.ruc === proveedorData.ruc)) {
+      // Editar
+      await ProveedorService.actualizar(proveedorData.ruc, proveedorData);
+      toast.success('Proveedor actualizado correctamente');
+    } else {
+      // Crear
+      await ProveedorService.crear(proveedorData);
+      toast.success('Proveedor guardado correctamente');
+    }
     await cargarProveedores();
     closeProveedorModal();
   } catch (error) {

@@ -13,6 +13,8 @@
 
 <script setup>
 import { reactive, watch } from 'vue';
+import API_BASE_URL from '../services/apiBase';
+
 const props = defineProps({ empleado: Object });
 const emit = defineEmits(['guardado', 'cancelar']);
 
@@ -29,8 +31,8 @@ watch(() => props.empleado, (val) => {
 
 const handleSubmit = async () => {
   const url = props.empleado
-    ? `http://localhost:3000/api/empleados/${props.empleado.cod_empleado}`
-    : 'http://localhost:3000/api/empleados';
+    ? `${API_BASE_URL}/empleados/${props.empleado.cod_empleado}`
+    : `${API_BASE_URL}/empleados`;
   const method = props.empleado ? 'PUT' : 'POST';
   await fetch(url, {
     method,

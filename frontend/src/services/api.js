@@ -1,10 +1,5 @@
 import axios from 'axios';
-
-// Configuración de la API - Detecta entorno automáticamente
-const API_BASE_URL =
-  window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:3000/api'
-    : '/api'; // Cambia la URL según tu entorno de desarrollo o producción
+import API_BASE_URL from './apiBase'; // <--- Importa la base URL
 
 // Crear una instancia de axios con configuración mejorada
 const api = axios.create({
@@ -52,13 +47,15 @@ api.interceptors.response.use(
   }
 );
 
-// Función para probar la conexión con el backend
+// Función para probar la conexión con el backend usando fetch
 export const testConnection = async () => {
   try {
     console.log('Probando conexión con el backend...');
-    const response = await api.get('/health');
-    console.log('Respuesta del backend:', response.data);
-    return response.data;
+    const res = await fetch(`${API_BASE_URL}/health`);
+    if (!res.ok) throw new Error('No se pudo conectar con el backend');
+    const data = await res.json();
+    console.log('Respuesta del backend:', data);
+    return data;
   } catch (error) {
     console.error('Error al conectar con el backend:', error);
     throw error;

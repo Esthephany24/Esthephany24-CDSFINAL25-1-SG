@@ -60,13 +60,18 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { UserPlus } from 'lucide-vue-next';
+
+const router = useRouter();
+
 const form = ref({
   dni: '', nombre: '', apellido_paterno: '', apellido_materno: '',
   fecha_nacimiento: '', telefono: '', direccion: '', email: '', contraseña: '', rol: 'cliente'
 });
 const error = ref('');
 const success = ref('');
+
 async function signup() {
   error.value = '';
   success.value = '';
@@ -79,6 +84,17 @@ async function signup() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
     success.value = data.message;
+    // Guarda el usuario en localStorage (puedes guardar el email, dni, o lo que recibas)
+    localStorage.setItem('user', JSON.stringify({
+      dni: form.value.dni,
+      email: form.value.email,
+      nombre: form.value.nombre,
+      rol: form.value.rol
+    }));
+    // Redirigir después de un pequeño delay para mostrar el mensaje
+    setTimeout(() => {
+      router.push('/productos');
+    }, 1200);
   } catch (err) {
     error.value = err.message;
   }

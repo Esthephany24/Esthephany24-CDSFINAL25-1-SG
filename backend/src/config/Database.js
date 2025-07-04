@@ -1,5 +1,12 @@
 const mysql = require('mysql2/promise');
-require('dotenv').config({ path: '.env.local' });
+
+// Detecta el entorno y carga el archivo .env correspondiente
+const envFile =
+  process.env.NODE_ENV === 'production'
+    ? '.env.production'
+    : '.env.local';
+
+require('dotenv').config({ path: envFile });
 
 class Database {
   constructor() {

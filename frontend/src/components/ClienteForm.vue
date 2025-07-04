@@ -9,6 +9,8 @@
 
 <script setup>
 import { reactive, watch } from 'vue';
+import API_BASE_URL from '../services/apiBase';
+
 const props = defineProps({ cliente: Object });
 const emit = defineEmits(['guardado', 'cancelar']);
 
@@ -24,8 +26,8 @@ watch(() => props.cliente, (val) => {
 
 const handleSubmit = async () => {
   const url = props.cliente
-    ? `http://localhost:4000/api/clientes/${form.dni}`
-    : 'http://localhost:4000/api/clientes';
+    ? `${API_BASE_URL}/clientes/${form.dni}`
+    : `${API_BASE_URL}/clientes`;
   const method = props.cliente ? 'PUT' : 'POST';
   await fetch(url, {
     method,

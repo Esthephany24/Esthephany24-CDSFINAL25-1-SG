@@ -1,78 +1,59 @@
-import api from './api';
+import API_BASE_URL from './apiBase';
 
 const CategoriaService = {
   // Obtener todas las categorías
   obtenerTodas: async () => {
-    try {
-      const response = await api.get('/categorias');
-      return response.data;
-    } catch (error) {
-
-      throw error;
-    }
+    const res = await fetch(`${API_BASE_URL}/categorias`);
+    if (!res.ok) throw new Error('Error al obtener categorías');
+    return await res.json();
   },
 
   // Obtener una categoría por ID
   obtenerPorId: async (id) => {
-    try {
-      const response = await api.get(`/categorias/${id}`);
-      return response.data;
-    } catch (error) {
-
-      throw error;
-    }
+    const res = await fetch(`${API_BASE_URL}/categorias/${id}`);
+    if (!res.ok) throw new Error('Error al obtener categoría');
+    return await res.json();
   },
 
   // Crear una nueva categoría
   crear: async (categoriaData) => {
-    try {
-      const response = await api.post('/categorias', categoriaData);
-      return response.data;
-    } catch (error) {
-
-      throw error;
-    }
+    const res = await fetch(`${API_BASE_URL}/categorias`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(categoriaData)
+    });
+    if (!res.ok) throw new Error('Error al crear categoría');
+    return await res.json();
   },
 
   // Actualizar una categoría existente
   actualizar: async (id, categoriaData) => {
-    try {
-      const response = await api.put(`/categorias/${id}`, categoriaData);
-      return response.data;
-    } catch (error) {
-
-      throw error;
-    }
+    const res = await fetch(`${API_BASE_URL}/categorias/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(categoriaData)
+    });
+    if (!res.ok) throw new Error('Error al actualizar categoría');
+    return await res.json();
   },
 
   // Verificar si un nombre de categoría existe
   verificarNombre: async (nombre) => {
-    try {
-      const response = await api.get(`/categorias/existe-nombre/${encodeURIComponent(nombre)}`);
-      // Mapear la respuesta del backend al formato esperado
-      return {
-        existe: response.data.resultado,
-        mensaje: response.data.mensaje
-      };
-    } catch (error) {
-
-      return {
-        existe: false,
-        mensaje: 'Error al verificar el nombre de la categoría'
-      };
-    }
+    const res = await fetch(`${API_BASE_URL}/categorias/existe-nombre/${encodeURIComponent(nombre)}`);
+    if (!res.ok) throw new Error('Error al verificar nombre');
+    const data = await res.json();
+    return {
+      existe: data.resultado,
+      mensaje: data.mensaje
+    };
   },
 
   // Verificar si un ID de categoría existe
   verificarId: async (id) => {
-    try {
-      const response = await api.get(`/categorias/existe-id/${id}`);
-      return response.data;
-    } catch (error) {
-
-      throw error;
-    }
-  },
+    const res = await fetch(`${API_BASE_URL}/categorias/existe-id/${id}`);
+    if (!res.ok) throw new Error('Error al verificar ID');
+    return await res.json();
+  }
 };
 
 export default CategoriaService;

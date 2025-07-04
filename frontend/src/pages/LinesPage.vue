@@ -344,15 +344,13 @@ const saveLine = async () => {
           throw new Error(updateResponse?.mensaje || 'Error al actualizar la línea');
         }
       } catch (updateError) {
-        // Error al actualizar la línea
-        const errorMessage = updateError.response?.data?.mensaje || 'Error al actualizar la línea. Por favor, intente nuevamente.';
-        
+        const errorMessage = updateError.response?.data?.mensaje || updateError.message || 'Error al actualizar la línea. Por favor, intente nuevamente.';
         if (updateError.response?.data?.field) {
           lineErrors[updateError.response.data.field] = errorMessage;
-        } else if (proxy && proxy.$toast) {
+        } else {
           proxy.$toast.error(errorMessage, 3000);
         }
-        return; // Exit early on error
+        return;
       }
     } else {
       // For new lines

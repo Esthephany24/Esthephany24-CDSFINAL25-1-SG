@@ -1,4 +1,6 @@
-const API = 'http://localhost:3000/api/empleados';
+import API_BASE_URL from './apiBase';
+
+const API = `${API_BASE_URL}/empleados`;
 
 export async function getEmpleados() {
   const res = await fetch(API);

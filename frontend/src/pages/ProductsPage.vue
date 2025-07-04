@@ -430,14 +430,8 @@ const saveProduct = async (productoData) => {
       // Mostrar notificación de éxito
       proxy.$toast.success('Producto actualizado correctamente', 3000);
     } else {
-
-      const resultado = await crearProducto(datosAEnviar);
-
-      
-      // Recargar los productos después de crear uno nuevo
+      await crearProducto(datosAEnviar); // Asegúrate que datosAEnviar tenga todos los campos requeridos
       await cargarProductos();
-      
-      // Mostrar notificación de éxito
       proxy.$toast.success('Producto creado correctamente', 3000);
     }
     closeProductModal();

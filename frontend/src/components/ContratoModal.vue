@@ -80,13 +80,29 @@
           <div class="form-grid">
             <div class="form-group">
               <label class="required">Empleado</label>
-              <select v-model="form.cod_empleado" required class="form-control">
-                <option value="">Seleccione empleado</option>
-                <option v-for="emp in empleados" :key="emp.cod_empleado" :value="emp.cod_empleado">
-                  {{ emp.nombre }} {{ emp.apellido_paterno }}
-                </option>
-              </select>
-              <div v-if="errores.cod_empleado" class="error-message">{{ errores.cod_empleado }}</div>
+              <div v-if="editando">
+                <input
+                  type="text"
+                  v-model="empleadoNombre"
+                  readonly
+                  class="form-control"
+                />
+              </div>
+              <div v-else>
+                <select v-model="form.cod_empleado" required class="form-control">
+                  <option value="">Seleccione empleado</option>
+                  <option
+                    v-for="emp in empleados"
+                    :key="emp.cod_empleado"
+                    :value="emp.cod_empleado"
+                  >
+                    {{ emp.nombre }} {{ emp.apellido_paterno }}
+                  </option>
+                </select>
+              </div>
+              <div v-if="errores.cod_empleado" class="error-message">
+                {{ errores.cod_empleado }}
+              </div>
             </div>
             <div class="form-group">
               <label class="required">Fecha Inicio</label>
@@ -159,6 +175,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import { Plus, X, Edit, Trash, Search } from 'lucide-vue-next';
+import API_BASE_URL from '../services/apiBase';
 
 const contratos = ref([]);
 const empleados = ref([]);
@@ -194,11 +211,11 @@ const contratosFiltrados = computed(() =>
 );
 
 const cargarContratos = async () => {
-  const res = await fetch('http://localhost:3000/api/contratos');
+  const res = await fetch(`${API_BASE_URL}/contratos`);
   contratos.value = await res.json();
 };
 const cargarEmpleados = async () => {
-  const res = await fetch('http://localhost:3000/api/empleados');
+  const res = await fetch(`${API_BASE_URL}/empleados`);
   empleados.value = (await res.json()).filter(e => e.estado === 'activo');
 };
 
@@ -222,8 +239,8 @@ async function guardarContrato() {
   error.value = '';
   const method = editando.value ? 'PUT' : 'POST';
   const url = editando.value
-    ? `http://localhost:3000/api/contratos/${form.cod_contrato}`
-    : 'http://localhost:3000/api/contratos';
+    ? `${API_BASE_URL}/contratos/${form.cod_contrato}`
+    : `${API_BASE_URL}/contratos`;
 
   const res = await fetch(url, {
     method,
@@ -247,9 +264,7 @@ function pedirConfirmacionEliminar(contrato) {
 
 async function eliminarConfirmado() {
   if (!contratoAEliminar.value) return;
-  await fetch(`http://localhost:3000/api/contratos/${contratoAEliminar.value.cod_contrato}`, {
-    method: 'DELETE'
-  });
+  await fetch(`${API_BASE_URL}/contratos/${contratoAEliminar.value.cod_contrato}`, { method: 'DELETE' });
   showConfirmDelete.value = false;
   cargarContratos();
   mostrarMensaje('Contrato eliminado correctamente');

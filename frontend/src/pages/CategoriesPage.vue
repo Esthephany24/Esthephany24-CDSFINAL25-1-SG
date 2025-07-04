@@ -61,7 +61,7 @@
               <button @click="openCategoryModal(categoria)" class="icon-button edit">
                 <Edit class="icon-small" />
               </button>
-              <button @click="deleteCategory(categoria.id)" class="icon-button delete" title="Eliminar">
+              <button @click="askDeleteCategory(categoria)" class="icon-button delete" title="Eliminar">
                 <svg class="icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                   stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="3 6 5 6 21 6"></polyline>
@@ -126,6 +126,14 @@
       @clear-error="clearError"
     />
 
+    <!-- Modal de confirmación para eliminar categoría -->
+    <ConfirmDeleteModal
+      :show="showDeleteModal"
+      :message="`¿Deseas eliminar la categoría '${categoryToDelete?.nombre || ''}' solo de la página?`"
+      @close="showDeleteModal = false"
+      @confirm="confirmDeleteCategory"
+    />
+
   </div>
 </template>
 
@@ -133,6 +141,7 @@
 import { ref, reactive, computed, onMounted, getCurrentInstance, watch } from 'vue';
 import { Plus, Edit, Grid, Search, X } from 'lucide-vue-next';
 import CategoryModal from '../components/CategoryModal.vue';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal.vue';
 import { useCategorias } from '../composables/useApi.js';
 import CategoriaService from '../services/categoriaService';
 
@@ -153,6 +162,8 @@ const { categorias, loading, error, crearCategoria, actualizarCategoria, elimina
 // Estados para modales
 const showCategoryModal = ref(false);
 const editingCategory = ref(null);
+const showDeleteModal = ref(false);
+const categoryToDelete = ref(null);
 
 // Estado para búsqueda
 const searchTerm = ref('');
@@ -194,9 +205,13 @@ const filtrarCategoriasPorBusqueda = (categorias, termino) => {
   });
 };
 
-// Computed para categorías visibles según la búsqueda
+
+// Computed para categorías visibles (filtra las eliminadas SIEMPRE)
 const categoriasVisibles = computed(() => {
-  return filtrarCategoriasPorBusqueda(categorias.value, searchTerm.value);
+  return filtrarCategoriasPorBusqueda(
+    categorias.value.filter(cat => !eliminadas.value.includes(cat.cod_categoria || cat.id)),
+    searchTerm.value
+  );
 });
 
 // Computed para paginación
@@ -361,13 +376,8 @@ const saveCategory = async () => {
     
     // Actualizar la lista de categorías localmente sin recargar todo
     if (editingCategory.value) {
-      // Actualizar categoría existente
-      const index = categorias.value.findIndex(c => c.id === editingCategory.value.id);
-      if (index !== -1) {
-        categorias.value[index] = { ...categorias.value[index], ...categoriaData };
-      }
+      await cargarCategorias(); // Recarga desde el backend para reflejar cambios
     } else if (response && response.data) {
-      // Agregar nueva categoría
       categorias.value.push(response.data);
     }
     
@@ -380,7 +390,7 @@ const saveCategory = async () => {
     
     // Check for validation errors from the server
     if (err.response) {
-      // Server responded with a status code outside the 2xx range
+      
       // Error en la respuesta del servidor
       // Código de estado del error
       
@@ -432,6 +442,31 @@ const saveCategory = async () => {
   }
 };
 
+// Guarda los IDs de categorías eliminadas en localStorage y filtra en el frontend
+const eliminadas = ref(JSON.parse(localStorage.getItem('categoriasEliminadas') || '[]'));
+
+const deleteCategory = (id) => {
+  if (!eliminadas.value.includes(id)) eliminadas.value.push(id);
+  localStorage.setItem('categoriasEliminadas', JSON.stringify(eliminadas.value));
+  proxy.$toast.success('Categoría eliminada de la página');
+};
+
+// Confirmar eliminación de categoría
+const confirmDeleteCategory = () => {
+  if (categoryToDelete.value) {
+    const id = categoryToDelete.value.cod_categoria || categoryToDelete.value.id;
+    if (!eliminadas.value.includes(id)) eliminadas.value.push(id);
+    localStorage.setItem('categoriasEliminadas', JSON.stringify(eliminadas.value));
+    proxy.$toast.success('Categoría eliminada de la página');
+  }
+  showDeleteModal.value = false;
+  categoryToDelete.value = null;
+};
+
+const askDeleteCategory = (categoria) => {
+  categoryToDelete.value = categoria;
+  showDeleteModal.value = true;
+};
 </script>
 
 <style scoped>

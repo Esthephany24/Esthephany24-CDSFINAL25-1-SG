@@ -20,6 +20,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { Plus, X, Edit, Trash, Search } from 'lucide-vue-next';
 import ContratoModal from '../components/ContratoModal.vue';
+import API_BASE_URL from '../services/apiBase';
 
 const contratos = ref([]);
 const empleados = ref([]);
@@ -28,13 +29,11 @@ const showModal = ref(false);
 const editando = ref(false);
 const contratoSeleccionado = ref({});
 const cargarContratos = async () => {
-  // Debes hacer un fetch a tu backend y unir con datos de empleados
-  const res = await fetch('http://localhost:3000/api/contratos');
+  const res = await fetch(`${API_BASE_URL}/contratos`);
   contratos.value = await res.json();
-  // Si quieres mostrar nombre de empleado, haz join en el backend o aquí
 };
 const cargarEmpleados = async () => {
-  const res = await fetch('http://localhost:3000/api/empleados');
+  const res = await fetch(`${API_BASE_URL}/empleados`);
   empleados.value = await res.json();
 };
 onMounted(() => {
@@ -54,8 +53,8 @@ function editar(contrato) {
 async function guardarContrato(contrato) {
   const method = editando.value ? 'PUT' : 'POST';
   const url = editando.value
-    ? `http://localhost:3000/api/contratos/${contrato.cod_contrato}`
-    : 'http://localhost:3000/api/contratos';
+    ? `${API_BASE_URL}/contratos/${contrato.cod_contrato}`
+    : `${API_BASE_URL}/contratos`;
   await fetch(url, {
     method,
     headers: { 'Content-Type': 'application/json' },

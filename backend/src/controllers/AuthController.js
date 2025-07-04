@@ -31,6 +31,39 @@ const AuthController = {
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
+  },
+
+  async signup(req, res) {
+    try {
+      const {
+        dni, nombre, apellido_paterno, apellido_materno,
+        fecha_nacimiento, telefono, direccion, email, contraseña, rol
+      } = req.body;
+
+      // Hashear la contraseña antes de enviarla al procedimiento
+      const contraseña_hash = await bcrypt.hash(contraseña, 10);
+
+      // Llamar al procedimiento almacenado
+      await db.pool.query(
+        `CALL RegistrarNuevoUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          dni,
+          nombre,
+          apellido_paterno,
+          apellido_materno,
+          fecha_nacimiento,
+          telefono,
+          direccion,
+          email,
+          contraseña_hash,
+          rol
+        ]
+      );
+
+      res.json({ message: 'Usuario registrado correctamente' });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
   }
 };
 
