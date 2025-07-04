@@ -2,7 +2,12 @@ const database = require('../config/Database');
 
 class Empleado {
   static async ObtenerTodosLosEmpleados() {
-    const [rows] = await database.pool.query('SELECT * FROM Empleados');
+    const [rows] = await database.pool.query(`
+      SELECT e.*, p.nombre, p.apellido_paterno, p.apellido_materno, p.dni, u.email
+      FROM Empleados e
+      JOIN Personas p ON e.dni = p.dni
+      LEFT JOIN UsuariosSistema u ON u.dni = p.dni
+    `);
     return rows;
   }
 

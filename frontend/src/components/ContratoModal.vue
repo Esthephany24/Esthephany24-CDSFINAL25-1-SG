@@ -80,25 +80,21 @@
           <div class="form-grid">
             <div class="form-group">
               <label class="required">Empleado</label>
-              <div v-if="editando">
-                <input
-                  type="text"
-                  v-model="empleadoNombre"
-                  readonly
-                  class="form-control"
-                />
-              </div>
-              <div v-else>
-                <select v-model="form.cod_empleado" required class="form-control">
-                  <option value="">Seleccione empleado</option>
-                  <option
-                    v-for="emp in empleados"
-                    :key="emp.cod_empleado"
-                    :value="emp.cod_empleado"
-                  >
-                    {{ emp.nombre }} {{ emp.apellido_paterno }}
-                  </option>
-                </select>
+              <select v-model="form.cod_empleado" @change="handleEmpleadoChange" required class="form-control">
+                <option value="">Seleccione empleado</option>
+                <option
+                  v-for="emp in empleados"
+                  :key="emp.cod_empleado"
+                  :value="emp.cod_empleado"
+                >
+                  {{ emp.nombre }} {{ emp.apellido_paterno }} {{ emp.apellido_materno }}
+                </option>
+              </select>
+              <div v-if="empleadoSeleccionado">
+                <small>
+                  <b>DNI:</b> {{ empleadoSeleccionado.dni }}<br>
+                  <b>Email:</b> {{ empleadoSeleccionado.email }}
+                </small>
               </div>
               <div v-if="errores.cod_empleado" class="error-message">
                 {{ errores.cod_empleado }}
@@ -301,6 +297,14 @@ function validarContratoForm() {
     valido = false;
   }
   return valido;
+}
+
+const empleadoSeleccionado = computed(() =>
+  empleados.value.find(e => e.cod_empleado === form.cod_empleado)
+);
+
+function handleEmpleadoChange() {
+  // Aquí puedes actualizar otros campos si lo necesitas
 }
 
 onMounted(() => {
