@@ -62,6 +62,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { UserPlus } from 'lucide-vue-next';
+import API_BASE_URL from '../services/apiBase';
 
 const router = useRouter();
 
@@ -76,7 +77,7 @@ async function signup() {
   error.value = '';
   success.value = '';
   try {
-    const res = await fetch('http://localhost:3000/api/auth/signup', {
+    const res = await fetch(`${API_BASE_URL}/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form.value)

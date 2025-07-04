@@ -25,6 +25,8 @@
 import { ref } from 'vue';
 import { LogIn } from 'lucide-vue-next';
 import { useRouter } from 'vue-router';
+import API_BASE_URL from '../services/apiBase';
+
 const router = useRouter();
 const email = ref('');
 const contraseña = ref('');
@@ -32,7 +34,7 @@ const error = ref('');
 async function login() {
   error.value = '';
   try {
-    const res = await fetch('http://localhost:3000/api/auth/login', {
+    const res = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email.value, contraseña: contraseña.value })

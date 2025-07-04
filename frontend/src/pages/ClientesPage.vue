@@ -141,6 +141,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import { Plus, X, Edit, Trash, Search } from 'lucide-vue-next';
+import API_BASE_URL from '../services/apiBase';
 
 const clientes = ref([]);
 const busqueda = ref('');
@@ -171,7 +172,7 @@ const clientesFiltrados = computed(() =>
 );
 
 const cargarClientes = async () => {
-  const res = await fetch('http://localhost:3000/api/clientes');
+  const res = await fetch(`${API_BASE_URL}/clientes`);
   clientes.value = await res.json();
 };
 
@@ -195,8 +196,8 @@ async function guardarCliente() {
   error.value = '';
   const method = editando.value ? 'PUT' : 'POST';
   const url = editando.value
-    ? `http://localhost:3000/api/clientes/${form.dni}`
-    : 'http://localhost:3000/api/clientes';
+    ? `${API_BASE_URL}/clientes/${form.dni}`
+    : `${API_BASE_URL}/clientes`;
 
   const res = await fetch(url, {
     method,
@@ -220,7 +221,7 @@ function pedirConfirmacionEliminar(cliente) {
 
 async function eliminarConfirmado() {
   if (!clienteAEliminar.value) return;
-  await fetch(`http://localhost:3000/api/clientes/${clienteAEliminar.value.dni}`, {
+  await fetch(`${API_BASE_URL}/clientes/${clienteAEliminar.value.dni}`, {
     method: 'DELETE'
   });
   showConfirmDelete.value = false;

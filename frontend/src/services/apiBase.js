@@ -1,5 +1,6 @@
-const API_BASE_URL =
+const API_BASE_URL = 'https://cds-final-fabianatura.onrender.com/api';
+  /*
   window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:3000/api'
-    : 'https://cds-final-fabianatura.onrender.com/api';
+    : 'https://cds-final-fabianatura.onrender.com/api';*/
 export default API_BASE_URL;
