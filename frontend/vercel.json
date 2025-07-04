@@ -9,11 +9,10 @@
       }
     }
   ],
-  
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://TU_DOMINIO_BACKEND/api/$1"
+      "destination": "https://cds-final-fabianatura.onrender.com/api/$1"
     }
   ]
 }
